@@ -71,5 +71,14 @@ public:
   OptDataSeqMapping(TcpOption_t oName, uint64_t dSeqNum, uint16_t dLevelLength, uint32_t sfSeqNum);
 };
 
+class OptMp : public TcpOptions
+{
+public:
+  virtual
+  ~OptMp();
+  uint64_t no_operation;
+  OptMp(TcpOption_t oName, uint64_t no_operation);
+};
+
 }
 #endif /* TCP_OPTIONS */

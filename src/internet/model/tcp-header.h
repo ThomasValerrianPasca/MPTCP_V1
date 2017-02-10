@@ -58,6 +58,7 @@ public:
   bool AddOptJOIN(TcpOption_t optName, uint32_t RxToken, uint8_t addrID);   // Join Connection Option
   bool AddOptADDR(TcpOption_t optName, uint8_t addrID, Ipv4Address addr);// Add address Option
   bool AddOptDSN(TcpOption_t optName, uint64_t dSeqNum, uint16_t dLevelLength, uint32_t sfSeqNum); // Data Sequence Mapping Option
+ // bool AddOptInitial(TcpOption_t optName, uint64_t no_operation);
   void SetOptionsLength(uint8_t length);
   void SetPaddingLength(uint8_t length);
   uint8_t GetOptionsLength() const;

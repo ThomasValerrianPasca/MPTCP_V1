@@ -45,9 +45,9 @@ main(int argc, char *argv[])
   Config::SetDefault("ns3::DropTailQueue::Mode", StringValue("QUEUE_MODE_PACKETS"));
   Config::SetDefault("ns3::DropTailQueue::MaxPackets", UintegerValue(100));
   Config::SetDefault("ns3::TcpL4Protocol::SocketType", TypeIdValue(MpTcpSocketBase::GetTypeId()));
-  Config::SetDefault("ns3::MpTcpSocketBase::MaxSubflows", UintegerValue(8)); // Sink
+  Config::SetDefault("ns3::MpTcpSocketBase::MaxSubflows", UintegerValue(3)); // Sink
   //Config::SetDefault("ns3::MpTcpSocketBase::CongestionControl", StringValue("RTT_Compensator"));
-  //Config::SetDefault("ns3::MpTcpSocketBase::PathManagement", StringValue("NdiffPorts"));
+  Config::SetDefault("ns3::MpTcpSocketBase::PathManagement", StringValue("FullMesh"));
 
   NodeContainer nodes;
   nodes.Create(2);
@@ -78,6 +78,7 @@ main(int argc, char *argv[])
   sourceApps.Start(Seconds(0.0));
   sourceApps.Stop(Seconds(10.0));
 
+  pointToPoint.EnablePcap("pcap_3_subflow",devices,true);
   NS_LOG_INFO ("Run Simulation.");
   Simulator::Stop(Seconds(20.0));
   Simulator::Run();

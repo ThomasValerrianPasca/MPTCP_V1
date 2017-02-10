@@ -264,6 +264,7 @@ bool
 MpTcpSocketBase::ReadOptions(Ptr<Packet> pkt, const TcpHeader& mptcpHeader)
 { // Any packet without SYN and MP_CAPABLE is not being processed!
   NS_LOG_FUNCTION(this << mptcpHeader);
+  std::cout<<"MPcapable" <<std::endl;
   NS_ASSERT(remoteToken == 0 && mpEnabled == false);
   vector<TcpOptions*> mp_options = mptcpHeader.GetOptions();
   uint8_t flags = mptcpHeader.GetFlags();
@@ -1126,10 +1127,20 @@ MpTcpSocketBase::SendDataPacket(uint8_t sFlowIdx, uint32_t size, bool withAck)
   TcpHeader header;
   header.SetFlags(flags);
   header.SetSequenceNumber(SequenceNumber32(sFlow->TxSeqNumber));
+  if(flags==16){
   header.SetAckNumber(SequenceNumber32(sFlow->RxSeqNumber));
+  }
+  else{
+	  header.SetAckNumber(SequenceNumber32(0));
+  }
   header.SetSourcePort(sFlow->sPort);
   header.SetDestinationPort(sFlow->dPort);
   header.SetWindowSize(AdvertisedWindowSize());
+
+//  header.SetUrgentPointer(1000);
+ // header.SetFlags(24);// Thomas has changed it
+// header.SetUrgentPointer(0); // THomas has chanaged it
+  //header.AddOptInitial(OPT_MPC,0); //Thomas added it
   if (!guard)
     { // If packet is made from sendingBuffer, then we got to add the packet and its info to subflow's mapDSN.
       sFlow->AddDSNMapping(sFlowIdx, nextTxSequence, packetSize, sFlow->TxSeqNumber, sFlow->RxSeqNumber/*, p->Copy()*/);
@@ -1146,7 +1157,7 @@ MpTcpSocketBase::SendDataPacket(uint8_t sFlowIdx, uint32_t size, bool withAck)
 
   uint8_t hlen = 5;   // 5 --> 32-bit words = 20 Bytes == TcpHeader Size with out any option
   //uint8_t olen = 15;  // 15 because packet size is 2 bytes in size. 1 + 8 + 2+ 4 = 15
-  uint8_t olen = 20;
+  uint8_t olen = 32;//20 ==> Thomas has changed it
   uint8_t plen = 0;
   plen = (4 - (olen % 4)) % 4; // (4 - (15 % 4)) 4 => 1
   olen = (olen + plen) / 4;    // (15 + 1) / 4 = 4
@@ -1154,8 +1165,9 @@ MpTcpSocketBase::SendDataPacket(uint8_t sFlowIdx, uint32_t size, bool withAck)
   header.SetLength(hlen);
   header.SetOptionsLength(olen);
   header.SetPaddingLength(plen);
-
-  NS_LOG_ERROR("hLen: " << (int)hlen << " oLen: " << (int)olen << " pLen: " << (int)plen);
+ // std::cout<<"olen = "<< uint16_t(olen)<<" Options length : "<<uint16_t(header.GetOptionsLength())<<std::endl;
+  //std::cout<<" The value of header flags :"<<uint16_t(header.GetFlags()) <<" Urgent pointer: "<< header.GetUrgentPointer()<< "  padding length= "<< uint16_t(header.GetPaddingLength())<<std::endl;
+  NS_LOG_ERROR("hLen: " << (int)hlen << " oLen: " << (int) olen << " pLen: " << (int)plen);
 
   // Check RTO, if expired then reschedule it again.
   SetReTxTimeout(sFlowIdx);
@@ -2197,7 +2209,7 @@ MpTcpSocketBase::SendEmptyPacket(uint8_t sFlowIdx, uint8_t flags)
     }
 
   //if (!isAck)
-  NS_LOG_INFO("("<< (int)sFlowIdx<<") SendEmptyPacket-> "<< header <<" Length: "<< (int)header.GetLength());
+ // NS_LOG_INFO("("<< (int)sFlowIdx<<") SendEmptyPacket-> "<< header <<" Length: "<< (int)header.GetLength());
 }
 
 void

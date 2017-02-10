@@ -89,6 +89,7 @@ TcpHeader::SetWindowSize(uint16_t windowSize)
 void
 TcpHeader::SetUrgentPointer(uint16_t urgentPointer)
 {
+	//std::cout<<"The pointer is set value :"<<urgentPointer<<std::endl;
   m_urgentPointer = urgentPointer;
 }
 
@@ -383,20 +384,23 @@ TcpHeader::Serialize(Buffer::Iterator start) const
   i.WriteHtonU16(m_length << 12 | m_flags);    //reserved bits are all zero
   i.WriteHtonU16(m_windowSize);
   i.WriteHtonU16(0);
+  //i.WriteHtonU16(0); // Thomas have added this
   i.WriteHtonU16(m_urgentPointer);
 
-  if (m_calcChecksum)
-    {
-      uint16_t headerChecksum = CalculateHeaderChecksum(start.GetSize());
-      i = start;
-      uint16_t checksum = i.CalculateIpChecksum(start.GetSize(), headerChecksum);
 
-      i = start;
-      i.Next(16);
-      i.WriteU16(checksum);
-    }
+//  if (m_calcChecksum)
+//    {
+//      uint16_t headerChecksum = CalculateHeaderChecksum(start.GetSize());
+//      i = start;
+//      uint16_t checksum = i.CalculateIpChecksum(start.GetSize(), headerChecksum);
+//
+//      i = start;
+//      i.Next(16);
+//      i.WriteU16(checksum);
+//    }
 
   // write options in head
+  std::cout<< "Option size ="<<m_option.size()<<std::endl;
   for (uint32_t j = 0; j < m_option.size(); j++)
     {
       TcpOptions *opt = m_option[j];
@@ -405,7 +409,7 @@ TcpHeader::Serialize(Buffer::Iterator start) const
       OptAddAddress *optADDR;
       OptDataSeqMapping *optDSN;
       i.WriteU8(TcpOptionToUint(opt->optName));
-
+     // i.WriteU8(30); //Thomas added
       if (opt->optName == OPT_MPC)
         {
           optMPC = (OptMultipathCapable *) opt;
@@ -482,6 +486,7 @@ TcpHeader::Deserialize(Buffer::Iterator start)
   SetLength(hlen);
   SetWindowSize(i.ReadNtohU16());
   i.Next(2);
+  //SetUrgentPointer(0);
   SetUrgentPointer(i.ReadNtohU16());
 
   hlen = (hlen - 5) * 4;
@@ -758,5 +763,18 @@ TcpHeader::AddOptDSN(TcpOption_t optName, uint64_t dSeqNum, uint16_t dLevelLengt
     }
   return false;
 }
+
+//bool
+//TcpHeader::AddOptInitial(TcpOption_t optName, uint64_t no_operation)
+//{
+////  NS_LOG_FUNCTION(this);
+//  if (optName == OPT_MPC)
+//    {
+//	  OptMp* opt = new OptMp(optName, no_operation);
+//      m_option.insert(m_option.end(), opt);
+//      return true;
+//    }
+//  return false;
+//}
 
 }// namespace ns3
