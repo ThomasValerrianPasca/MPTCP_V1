@@ -57,9 +57,9 @@ main (int argc, char *argv[])
 	Config::SetDefault("ns3::DropTailQueue::Mode", StringValue("QUEUE_MODE_PACKETS"));
 	Config::SetDefault("ns3::DropTailQueue::MaxPackets", UintegerValue(100));
 	Config::SetDefault("ns3::TcpL4Protocol::SocketType", TypeIdValue(MpTcpSocketBase::GetTypeId()));
-	Config::SetDefault("ns3::MpTcpSocketBase::MaxSubflows", UintegerValue(3)); // Sink
-	//Config::SetDefault("ns3::MpTcpSocketBase::CongestionControl", StringValue("RTT_Compensator"));
-	Config::SetDefault("ns3::MpTcpSocketBase::PathManagement", StringValue("NdiffPorts"));
+	Config::SetDefault("ns3::MpTcpSocketBase::MaxSubflows", UintegerValue(2)); // Sink
+	Config::SetDefault("ns3::MpTcpSocketBase::CongestionControl", StringValue("Linked_Increases"));
+	Config::SetDefault("ns3::MpTcpSocketBase::PathManagement", StringValue("FullMesh"));//NdiffPorts
 
 
 	CommandLine cmd;
@@ -89,7 +89,7 @@ main (int argc, char *argv[])
 
 
 	CsmaHelper csma;
-	csma.SetChannelAttribute ("DataRate", StringValue ("100Mbps"));
+	csma.SetChannelAttribute ("DataRate", StringValue ("10Mbps"));
 	csma.SetChannelAttribute ("Delay", TimeValue (NanoSeconds (6560)));
 
 	NetDeviceContainer csmaDevices, additional_link;
@@ -126,14 +126,14 @@ main (int argc, char *argv[])
 	sourceApps.Stop(Seconds(10.0));
 	csma.EnablePcap ("second", Combined, true);
 
-/*
+
 	FlowMonitorHelper flowmon;
 	Ptr<FlowMonitor> monitor;
 
-	monitor= flowmon.Install (csmaNodes.Get(0));
-	flowmon.Install(csmaNodes.Get(3));
-*/
+	//monitor= flowmon.Install (csmaNodes);
+	//flowmon.Install(csmaNodes);
 
+Simulator::Stop(Seconds(11));
 	Simulator::Run ();
 /*
 	monitor->CheckForLostPackets ();

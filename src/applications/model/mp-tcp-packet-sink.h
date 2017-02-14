@@ -59,6 +59,7 @@ private:
   void HandleAccept (Ptr<Socket>, const Address& from);
   void HandlePeerClose (Ptr<Socket>);
   void HandlePeerError (Ptr<Socket>);
+ static void PrintThroughput (void);
 
   Ptr<MpTcpSocketBase>      m_socket;       // Listening socket
   std::list<Ptr<Socket> >   m_socketList;   //the accepted sockets
@@ -67,8 +68,11 @@ private:
   uint32_t   m_totalRx;      // Total bytes received
   TypeId     m_tid;          // Protocol TypeId
   uint32_t   size;
+
+
   //uint8_t    *buf;
   TracedCallback<Ptr<const Packet>, const Address &> m_rxTrace;
+
 };
 
 } // namespace ns3

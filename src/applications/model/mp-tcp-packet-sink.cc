@@ -18,7 +18,7 @@
  *
  * Author:  Tom Henderson (tomhend@u.washington.edu)
  * Modified by Morteza Kheirkhah (m.kheirkhah@sussex.ac.uk)
-*/
+ */
 
 #include "ns3/address.h"
 #include "ns3/address-utils.h"
@@ -43,151 +43,171 @@ namespace ns3
 
 NS_OBJECT_ENSURE_REGISTERED(MpTcpPacketSink);
 
+uint32_t   m_initial_flag=0;
+double local_throguhput=0;
+
+
 TypeId
 MpTcpPacketSink::GetTypeId(void)
 {
-  static TypeId tid = TypeId("ns3::MpTcpPacketSink")
-      .SetParent<Application>()
-      .AddConstructor<MpTcpPacketSink>()
-      .AddAttribute("Local", "The Address on which to Bind the rx socket.",
-          AddressValue(),
-          MakeAddressAccessor(&MpTcpPacketSink::m_local),
-          MakeAddressChecker())
-      .AddAttribute ("Protocol", "The type id of the protocol to use for the rx socket.",
-                   TypeIdValue (TcpSocketFactory::GetTypeId ()),
-                   MakeTypeIdAccessor (&MpTcpPacketSink::m_tid),
-                   MakeTypeIdChecker ())
-//    .AddTraceSource ("Rx", "A packet has been received",
-//                     MakeTraceSourceAccessor (&MpTcpPacketSink::m_rxTrace))
-      ;
-  return tid;
+	static TypeId tid = TypeId("ns3::MpTcpPacketSink")
+    		  .SetParent<Application>()
+    		  .AddConstructor<MpTcpPacketSink>()
+    		  .AddAttribute("Local", "The Address on which to Bind the rx socket.",
+    				  AddressValue(),
+    				  MakeAddressAccessor(&MpTcpPacketSink::m_local),
+    				  MakeAddressChecker())
+    				  .AddAttribute ("Protocol", "The type id of the protocol to use for the rx socket.",
+    						  TypeIdValue (TcpSocketFactory::GetTypeId ()),
+    						  MakeTypeIdAccessor (&MpTcpPacketSink::m_tid),
+    						  MakeTypeIdChecker ())
+    						  //    .AddTraceSource ("Rx", "A packet has been received",
+    						  //                     MakeTraceSourceAccessor (&MpTcpPacketSink::m_rxTrace))
+    						  ;
+	return tid;
 }
 
 MpTcpPacketSink::MpTcpPacketSink()
 {
-  NS_LOG_FUNCTION (this);
-  m_socket = 0;
-  m_totalRx = 0;
+	NS_LOG_FUNCTION (this);
+	m_socket = 0;
+	m_totalRx = 0;
+	//m_initial_flag = 0;
+	//local_throguhput = 0;
 }
 
 MpTcpPacketSink::~MpTcpPacketSink()
 {
-  NS_LOG_FUNCTION (this);
+	NS_LOG_FUNCTION (this);
 }
 
 uint32_t
 MpTcpPacketSink::GetTotalRx() const
 {
-  return m_totalRx;
+	return m_totalRx;
 }
 
 void
 MpTcpPacketSink::DoDispose(void)
 {
-  NS_LOG_FUNCTION (this);
-  m_socket = 0;
-
-  // chain up
-  Application::DoDispose();
+	NS_LOG_FUNCTION (this);
+	m_socket = 0;
+	//m_initial_flag=0;
+	// chain up
+	Application::DoDispose();
 }
 
 // Application Methods
 void
 MpTcpPacketSink::StartApplication()    // Called at time specified by Start
 {
-  NS_LOG_FUNCTION (this);
-  // Create the socket if not already
-  if (!m_socket)
-    {
-      size = 2000;
-      //buf = new uint8_t[size];
-      //m_socket = CreateObject<MpTcpSocketBase>(GetNode());
-      m_socket = DynamicCast<MpTcpSocketBase>(Socket::CreateSocket (GetNode (), m_tid));
-      m_socket->Bind(m_local);
-      m_socket->Listen();
-      NS_LOG_LOGIC("StartApplication -> MptcpPacketSink got an listening socket " << m_socket << " binded to addrs:port  " << InetSocketAddress::ConvertFrom(m_local).GetIpv4() << ":" << InetSocketAddress::ConvertFrom(m_local).GetPort());
-   //   std::cout<<"StartApplication -> MptcpPacketSink got an listening socket " << m_socket << " binded to addrs:port  " << InetSocketAddress::ConvertFrom(m_local).GetIpv4() << ":" << InetSocketAddress::ConvertFrom(m_local).GetPort()<<std::endl;
-    }
+	NS_LOG_FUNCTION (this);
+	// Create the socket if not already
+	if (!m_socket)
+	{
+		size = 2000;
+		//buf = new uint8_t[size];
+		//m_socket = CreateObject<MpTcpSocketBase>(GetNode());
+		m_socket = DynamicCast<MpTcpSocketBase>(Socket::CreateSocket (GetNode (), m_tid));
+		m_socket->Bind(m_local);
+		m_socket->Listen();
+		NS_LOG_LOGIC("StartApplication -> MptcpPacketSink got an listening socket " << m_socket << " binded to addrs:port  " << InetSocketAddress::ConvertFrom(m_local).GetIpv4() << ":" << InetSocketAddress::ConvertFrom(m_local).GetPort());
+		//   std::cout<<"StartApplication -> MptcpPacketSink got an listening socket " << m_socket << " binded to addrs:port  " << InetSocketAddress::ConvertFrom(m_local).GetIpv4() << ":" << InetSocketAddress::ConvertFrom(m_local).GetPort()<<std::endl;
+	}
 
-  m_socket->SetRecvCallback(MakeCallback(&MpTcpPacketSink::HandleRead, this));
-  m_socket->SetAcceptCallback(MakeNullCallback<bool, Ptr<Socket>, const Address &>(),
-      MakeCallback(&MpTcpPacketSink::HandleAccept, this));
-  m_socket->SetCloseCallbacks(MakeCallback(&MpTcpPacketSink::HandlePeerClose, this),
-      MakeCallback(&MpTcpPacketSink::HandlePeerError, this));
+	m_socket->SetRecvCallback(MakeCallback(&MpTcpPacketSink::HandleRead, this));
+	m_socket->SetAcceptCallback(MakeNullCallback<bool, Ptr<Socket>, const Address &>(),
+			MakeCallback(&MpTcpPacketSink::HandleAccept, this));
+	m_socket->SetCloseCallbacks(MakeCallback(&MpTcpPacketSink::HandlePeerClose, this),
+			MakeCallback(&MpTcpPacketSink::HandlePeerError, this));
 }
 
 void
 MpTcpPacketSink::StopApplication()     // Called at time specified by Stop
 {
-  NS_LOG_FUNCTION (this);     //
-  NS_LOG_WARN (Simulator::Now().GetSeconds() << " MpTcpPacketSink -> Total received bytes " << m_totalRx);
-  while (!m_socketList.empty()) //these are accepted sockets, close them
-    {
-      Ptr<Socket> acceptedSocket = m_socketList.front();
-      m_socketList.pop_front();
-      NS_LOG_INFO("MpTcpPacketSink -> Drop this accepted socket ,"<<acceptedSocket << ", and call Close on it ");
-      acceptedSocket->Close();
-      NS_LOG_INFO("MpTcpPacketSink -> Now SocketListSize is " << m_socketList.size());
-    }
+	NS_LOG_FUNCTION (this);     //
+	NS_LOG_WARN (Simulator::Now().GetSeconds() << " MpTcpPacketSink -> Total received bytes " << m_totalRx);
+	while (!m_socketList.empty()) //these are accepted sockets, close them
+	{
+		Ptr<Socket> acceptedSocket = m_socketList.front();
+		m_socketList.pop_front();
+		NS_LOG_INFO("MpTcpPacketSink -> Drop this accepted socket ,"<<acceptedSocket << ", and call Close on it ");
+		acceptedSocket->Close();
+		NS_LOG_INFO("MpTcpPacketSink -> Now SocketListSize is " << m_socketList.size());
+	}
 
-  if (m_socket)
-    {
-      NS_LOG_INFO("MpTcpPacketSink -> FINALY closing the listening socket, " << m_socket);
-      m_socket->Close();
-      m_socket->SetRecvCallback(MakeNullCallback<void, Ptr<Socket> >());
-    }
+	if (m_socket)
+	{
+		NS_LOG_INFO("MpTcpPacketSink -> FINALY closing the listening socket, " << m_socket);
+		m_socket->Close();
+		m_socket->SetRecvCallback(MakeNullCallback<void, Ptr<Socket> >());
+	}
 }
 
 void
 MpTcpPacketSink::HandleRead(Ptr<Socket> socket)
 {
-  NS_LOG_FUNCTION (this << m_socket);
-  Ptr<MpTcpSocketBase> mpSocket = DynamicCast<MpTcpSocketBase>(socket);
-  uint32_t dataAmount = mpSocket->Recv(size);
-  //uint32_t dataAmount = m_socket->Recv(buf, size);
-  m_totalRx += dataAmount;
-  NS_LOG_INFO ("MpTcpPacketSink:HandleRead() -> Received " << dataAmount << " bytes total Rx " << m_totalRx);
+	NS_LOG_FUNCTION (this << m_socket);
+	Ptr<MpTcpSocketBase> mpSocket = DynamicCast<MpTcpSocketBase>(socket);
+	uint32_t dataAmount = mpSocket->Recv(size);
+	//uint32_t dataAmount = m_socket->Recv(buf, size);
+	m_totalRx += dataAmount;
+	local_throguhput+=dataAmount;
+	if(m_initial_flag==0){
+		std::cout<<"Enetering";
+		m_initial_flag=1;
+		Simulator::Schedule(Seconds(1),&PrintThroughput);
+	}
+	NS_LOG_INFO ("MpTcpPacketSink:HandleRead() -> Received " << dataAmount << " bytes total Rx " << m_totalRx);
+
 }
 
 void
+MpTcpPacketSink::PrintThroughput(void)
+{
+	std::cout<<Simulator::Now().GetSeconds()<<" Throughput Observed = "<<local_throguhput/(1000000) <<" Mbps"<<std::endl;
+		local_throguhput=0;
+	Simulator::Schedule(Seconds(1),&PrintThroughput);
+}
+void
 MpTcpPacketSink::HandlePeerClose(Ptr<Socket> socket)
 {
-  NS_LOG_FUNCTION(this << socket);
-//  list<Ptr<Socket> >::iterator it = std::find(m_socketList.begin(), m_socketList.end(), socket);
-//  if (it != m_socketList.end())
-//    {
-//      m_socketList.erase(it);
-//      NS_LOG_UNCOND("A Socket has been Removed with Normal callback");
-//    }
+	NS_LOG_FUNCTION(this << socket);
+	//  list<Ptr<Socket> >::iterator it = std::find(m_socketList.begin(), m_socketList.end(), socket);
+	//  if (it != m_socketList.end())
+	//    {
+	//      m_socketList.erase(it);
+	//      NS_LOG_UNCOND("A Socket has been Removed with Normal callback");
+	//    }
 }
 
 void
 MpTcpPacketSink::HandlePeerError(Ptr<Socket> socket)
 {
-//  list<Ptr<Socket> >::iterator it = std::find(m_socketList.begin(), m_socketList.end(), socket);
-//  if (it != m_socketList.end())
-//    {
-//      m_socketList.erase(it);
-//      NS_LOG_UNCOND("A Socket has been Removed with Error callback");
-//    }
-  NS_LOG_FUNCTION(this << socket);
+	//  list<Ptr<Socket> >::iterator it = std::find(m_socketList.begin(), m_socketList.end(), socket);
+	//  if (it != m_socketList.end())
+	//    {
+	//      m_socketList.erase(it);
+	//      NS_LOG_UNCOND("A Socket has been Removed with Error callback");
+	//    }
+	NS_LOG_FUNCTION(this << socket);
 }
 
 void
 MpTcpPacketSink::HandleAccept(Ptr<Socket> s, const Address& from)
 {
-  NS_LOG_FUNCTION (this << s << from);
-  s->SetRecvCallback(MakeCallback(&MpTcpPacketSink::HandleRead, this));
-//  s->SetCloseCallbacks(MakeCallback(&MpTcpPacketSink::HandlePeerClose, this),
-//      MakeCallback(&MpTcpPacketSink::HandlePeerError, this));
-  m_socketList.push_back(s);
-  NS_LOG_INFO("MptcpPacketSink got an new connection. SocketList: " << m_socketList.size());
+	NS_LOG_FUNCTION (this << s << from);
+	s->SetRecvCallback(MakeCallback(&MpTcpPacketSink::HandleRead, this));
+	//  s->SetCloseCallbacks(MakeCallback(&MpTcpPacketSink::HandlePeerClose, this),
+	//      MakeCallback(&MpTcpPacketSink::HandlePeerError, this));
+	m_socketList.push_back(s);
+	NS_LOG_INFO("MptcpPacketSink got an new connection. SocketList: " << m_socketList.size());
 }
 
 Ptr<MpTcpSocketBase>
 MpTcpPacketSink::getMpTcpSocket()
 {
-  return m_socket;
+	return m_socket;
 }
 
 } // Namespace ns3
