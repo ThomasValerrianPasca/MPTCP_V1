@@ -436,7 +436,7 @@ MpTcpSocketBase::ProcessListen(Ptr<Packet> packet, const TcpHeader& mptcpHeader,
   // Clone the socket, simulate Fork()
   //Ptr<MpTcpSocketBase> newSock = CopyObject<MpTcpSocketBase>(this);
   Ptr<MpTcpSocketBase> newSock = DynamicCast<MpTcpSocketBase>(Fork());
-  //NS_LOG_UNCOND ("Clone new MpTcpSocketBase new connection. ListenerSocket " << this << " AcceptedSocket "<< newSock);
+  NS_LOG_UNCOND ("Clone new MpTcpSocketBase new connection. ListenerSocket " << this << " AcceptedSocket "<< newSock);
   Simulator::ScheduleNow(&MpTcpSocketBase::CompleteFork, newSock, packet, mptcpHeader, fromAddress, toAddress);
 }
 
@@ -1496,7 +1496,7 @@ int
 MpTcpSocketBase::Listen(void)
 {
   NS_LOG_FUNCTION(this);
-
+  NS_LOG_FUNCTION("State of listening "<<m_state);
   if (m_state != CLOSED)
     {
       m_errno = ERROR_INVAL;

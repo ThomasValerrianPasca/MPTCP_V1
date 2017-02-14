@@ -400,7 +400,7 @@ TcpHeader::Serialize(Buffer::Iterator start) const
 //    }
 
   // write options in head
-  std::cout<< "Option size ="<<m_option.size()<<std::endl;
+  //std::cout<< "Option size ="<<m_option.size()<<std::endl;
   for (uint32_t j = 0; j < m_option.size(); j++)
     {
       TcpOptions *opt = m_option[j];
