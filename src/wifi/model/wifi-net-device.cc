@@ -251,6 +251,7 @@ WifiNetDevice::IsBridge (void) const
 bool
 WifiNetDevice::Send (Ptr<Packet> packet, const Address& dest, uint16_t protocolNumber)
 {
+	//std::cout<<"destiantion =" <<dest<<std::endl;
   NS_ASSERT (Mac48Address::IsMatchingType (dest));
 
   Mac48Address realTo = Mac48Address::ConvertFrom (dest);

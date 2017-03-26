@@ -46,14 +46,14 @@ main(int argc, char *argv[])
   Config::SetDefault("ns3::DropTailQueue::MaxPackets", UintegerValue(100));
   Config::SetDefault("ns3::TcpL4Protocol::SocketType", TypeIdValue(MpTcpSocketBase::GetTypeId()));
   Config::SetDefault("ns3::MpTcpSocketBase::MaxSubflows", UintegerValue(3)); // Sink
-  //Config::SetDefault("ns3::MpTcpSocketBase::CongestionControl", StringValue("RTT_Compensator"));
+  Config::SetDefault("ns3::MpTcpSocketBase::CongestionControl", StringValue("UNCOUPLED")); //RTT_Compensator, COUPLED_INC,Linked_Increases,UNCOUPLED,COUPLED_INC
   Config::SetDefault("ns3::MpTcpSocketBase::PathManagement", StringValue("FullMesh"));
 
   NodeContainer nodes;
   nodes.Create(2);
 
   PointToPointHelper pointToPoint;
-  pointToPoint.SetDeviceAttribute("DataRate", StringValue("100Mbps"));
+  pointToPoint.SetDeviceAttribute("DataRate", StringValue("10Mbps"));
   pointToPoint.SetChannelAttribute("Delay", StringValue("1ms"));
 
   NetDeviceContainer devices;

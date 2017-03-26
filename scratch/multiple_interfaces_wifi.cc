@@ -57,9 +57,9 @@ main (int argc, char *argv[])
 	Config::SetDefault("ns3::DropTailQueue::Mode", StringValue("QUEUE_MODE_PACKETS"));
 	Config::SetDefault("ns3::DropTailQueue::MaxPackets", UintegerValue(100));
 	Config::SetDefault("ns3::TcpL4Protocol::SocketType", TypeIdValue(MpTcpSocketBase::GetTypeId()));
-	//Config::SetDefault("ns3::MpTcpSocketBase::MaxSubflows", UintegerValue(2)); // Sink
+	Config::SetDefault("ns3::MpTcpSocketBase::MaxSubflows", UintegerValue(2)); // Sink
 	Config::SetDefault("ns3::MpTcpSocketBase::CongestionControl", StringValue("Linked_Increases")); //
-	Config::SetDefault("ns3::MpTcpSocketBase::PathManagement", StringValue("NdiffPorts"));//NdiffPorts, FullMesh
+	Config::SetDefault("ns3::MpTcpSocketBase::PathManagement", StringValue("FullMesh"));//NdiffPorts
 
 
 	CommandLine cmd;

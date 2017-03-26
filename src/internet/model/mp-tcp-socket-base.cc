@@ -3420,7 +3420,7 @@ MpTcpSocketBase::AdvertiseAvailableAddresses()
 			//Ptr<NetDevice> device = m_node->GetDevice(i);
 			Ptr<Ipv4Interface> interface = ipv4->GetInterface(i);
 			Ipv4InterfaceAddress interfaceAddr = interface->GetAddress(0);
-
+			std::cout<<"List of addresses ="<< interfaceAddr.GetLocal() << " Broad cast =" <<interfaceAddr.GetBroadcast()  <<std::endl;
 			// Skip the loop-back
 			if (interfaceAddr.GetLocal() == Ipv4Address::GetLoopback())
 				continue;

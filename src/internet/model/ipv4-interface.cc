@@ -232,6 +232,7 @@ Ipv4Interface::Send (Ptr<Packet> p, Ipv4Address dest)
   if (m_device->NeedsArp ())
     {
       NS_LOG_LOGIC ("Needs ARP" << " " << dest);
+    //  std::cout<<"Needs ARP" << " " << dest<<std::endl;
       Ptr<ArpL3Protocol> arp = m_node->GetObject<ArpL3Protocol> ();
       Address hardwareDestination;
       bool found = false;
@@ -266,13 +267,16 @@ Ipv4Interface::Send (Ptr<Packet> p, Ipv4Address dest)
           if (!found)
             {
               NS_LOG_LOGIC ("ARP Lookup");
+             // std::cout<<"Lookedup for arp" <<std::endl;
               found = arp->Lookup (p, dest, m_device, m_cache, &hardwareDestination);
+           //   std::cout<<"Found ="<<found<<std::endl;
             }
         }
 
       if (found)
         {
           NS_LOG_LOGIC ("Address Resolved.  Send.");
+        //  std::cout<<"Calling here to mac id " <<hardwareDestination<<std::endl;
           m_device->Send (p, hardwareDestination,
                           Ipv4L3Protocol::PROT_NUMBER);
         }

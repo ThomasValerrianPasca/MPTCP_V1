@@ -34,7 +34,6 @@
 #include <ns3/eps-bearer.h>
 #include <ns3/epc-enb-s1-sap.h>
 #include <ns3/epc-s1ap-sap.h>
-#include "ns3/net-device.h"
 #include <map>
 
 namespace ns3 {
@@ -61,34 +60,8 @@ protected:
   void DoDispose (void);
 
 public:
-  static uint32_t onlylte;
- static uint64_t holding_time;
- static bool skip_ack;
- static bool DIDA;
- static bool boost_ack;
-  //static std::map<Mac48Address,std::map<double,double> > snr_per;
-  static std::map<Mac48Address,double> rssi;
-  static std::map<Mac48Address,Ipv4Address> macipmap;
-  void SendToS1uSocket (Ptr<Packet> packet, uint32_t teid);
-  static void resetfunc();
-  void udpstats(uint32_t fid,uint32_t pid, double recvbytes, double time);
-  void updatewifiload(double load);
-  void updatewifisinrper(double sinr,double per, Mac48Address macaddr);
-  static void updateltesinrper(std::string context,uint16_t cellid,uint16_t rnti, double sinr, double avgsinr);
-  void addbearer(Ipv4Address ip, EpsBearer bearer,double interpacketinterval);
- // static double uplinkthrpt_lte;
-  static double uplinkthrpt_wifi;
-  static double uplinksendpkt;
-  static uint32_t holded_packets;
-  static uint32_t lte_fraction;
-  static uint32_t wifi_fraction;
-  //static double ulfirstpktsend;
-  //void algo();
-  /*
-   * User Defined function for releasing a ue
-   *
-  void usrDefinedReleaseUe(uint16_t rnti);
-*/
+  
+  
 
   /** 
    * Constructor
@@ -101,28 +74,20 @@ public:
    * \param cellId the identifier of the enb
    */
   EpcEnbApplication (Ptr<Socket> lteSocket, Ptr<Socket> s1uSocket, Ipv4Address enbS1uAddress, Ipv4Address sgwS1uAddress, uint16_t cellId);
-  EpcEnbApplication (void);
+
   /**
    * Destructor
    * 
    */
   virtual ~EpcEnbApplication (void);
 
-/*
- * CRAN
- * A MAP to store beared ID and corresponding UE IP
- */
-  std::map<uint16_t,Ipv4Address>BEARER_ID_UE_IP_MAP;
+
   /** 
-   *
    * Set the S1 SAP User
    * 
    * \param s the S1 SAP User
    */
   void SetS1SapUser (EpcEnbS1SapUser * s);
-
-  // WiFi netdevice
-
 
   /** 
    * 
@@ -157,7 +122,7 @@ public:
    * \param socket pointer to the S1-U socket
    */
   void RecvFromS1uSocket (Ptr<Socket> socket);
-  void addusedrbs(double usedrbs);
+
 
   struct EpsFlowId_t
   {
@@ -199,6 +164,7 @@ private:
    * \param packet packet to be sent
    * \param teid the Tunnel Enpoint IDentifier
    */
+  void SendToS1uSocket (Ptr<Packet> packet, uint32_t teid);
 
 
   
@@ -277,12 +243,6 @@ private:
   std::map<uint64_t, uint16_t> m_imsiRntiMap;
 
   uint16_t m_cellId;
-  std::map<uint16_t, uint32_t>  Past_Ack_number_sent;
-  std::map<uint16_t,uint32_t> Last_Received_data_sequence_number;
-  std::map<uint16_t, uint64_t> timer_value;
-  std::map<uint16_t, uint32_t>  split_value;
-  std::map<uint16_t, Ptr<Packet> > last_stored_packet;
-
 
 };
 
